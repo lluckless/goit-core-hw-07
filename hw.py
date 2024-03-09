@@ -13,7 +13,15 @@ def input_error(func):
 
 class Field:
     def __init__(self, value):
-        self.value = value
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, new_value):
+        self._value = new_value
 
     def __str__(self):
         return str(self.value)
@@ -24,9 +32,13 @@ class Name(Field):
         
 class Phone(Field):
     def __init__(self, value):
-        if not self.is_valid_phone(value):
+        super().__init__(value)
+    
+    @Field.value.setter
+    def value(self, new_value):
+        if not self.is_valid_phone(new_value):
             raise ValueError("Invalid phone number format")
-        super().__init__(value)    
+        self._value = new_value    
     
     def is_valid_phone(self, phone):
         return len(phone) == 10 and phone.isdigit()
@@ -38,6 +50,14 @@ class Birthdays(Field):
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         super().__init__(value)
+
+    @Field.value.setter
+    def value(self, new_value):
+        try:
+            dtdt.strptime(new_value, "%d-%m-%Y")
+        except ValueError:
+            raise ValueError("Invalid date format. Use DD.MM.YYYY")
+        self._value = new_value
 
 
 class Record:
